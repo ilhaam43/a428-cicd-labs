@@ -24,11 +24,8 @@ node {
 
         stage('Deploy') {
             sh './jenkins/scripts/deliver.sh'
-            // Use timeout instead of input message to automatically end after 1 minute
-            timeout(time: 1, unit: 'MINUTES') {
-                // Keep the pipeline running for 1 minute
-                sleep(time: 60, unit: 'SECONDS')
-            }
+            // Keep the pipeline running for 1 minute
+            sleep(time: 60, unit: 'SECONDS')
             
             // Kill the application after timeout
             sh './jenkins/scripts/kill.sh'
