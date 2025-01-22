@@ -1,3 +1,10 @@
+// Define the build trigger for polling SCM every 2 minutes
+properties([
+    pipelineTriggers([
+        pollSCM('H/2 * * * *')
+    ])
+])
+
 node {
     stage('Checkout') {
         checkout scm
@@ -10,9 +17,20 @@ node {
         stage('Test') {
             sh './jenkins/scripts/test.sh'
         }
+
+        stage('Manual Approval') {
+            input message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed'
+        }
+
         stage('Deploy') {
             sh './jenkins/scripts/deliver.sh'
-            input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)'
+            // Use timeout instead of input message to automatically end after 1 minute
+            timeout(time: 1, unit: 'MINUTES') {
+                // Keep the pipeline running for 1 minute
+                sleep(time: 60, unit: 'SECONDS')
+            }
+            
+            // Kill the application after timeout
             sh './jenkins/scripts/kill.sh'
         }
     }
